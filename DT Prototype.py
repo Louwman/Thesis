@@ -2,12 +2,32 @@ import serial  # import Serial Library
 import numpy  # Import numpy
 import matplotlib.pyplot as plt  # import matplotlib library
 from drawnow import *
-import tkinter
-from tkinter import messagebox
+import tkinter as tk
 
 
-root = tkinter.Tk()
-root.withdraw()
+
+root = tk.Tk()
+# root.withdraw()
+works = tk.PhotoImage(file="pompworks.png")
+notworks = tk.PhotoImage(file="pompisnotworking.png")
+
+w1 = tk.Label(root, image=works)
+w1.pack(side="right")
+
+
+
+warning = tk.StringVar()
+warning.set("")
+
+
+
+w2 = tk.Message(root,
+              justify=tk.LEFT,
+              padx = 10,
+              textvariable=warning)
+w2.pack(side="left")
+root.geometry("1000x600")
+
 pressureP = [] #tempF
 milliamps = [] #pressure
 arduinoData = serial.Serial('/dev/cu.usbmodem14101')  # Import serial communication
@@ -45,7 +65,14 @@ while True:
     if (cnt > 100):  # safe 100 data points and remove the first when 100th datapoint is reached
         pressureP.pop(0)
         milliamps.pop(0)
+
     if (ma < 900) and (pressure < 1015): #threshold values determined from experiments
-        messagebox.showwarning("Warning", "the measured pressure is " + str(pressure) + " HPa. The measured current consuption is " + str(ma) + " Milliamps. You could 1) unclog the pipe (worked 60% of the time) 2) reduce the operational speed (worked 40% of the time)")
+        w1.configure(image=notworks)
+        warning.set("WARNING! The measured pressure is " + str(pressure) + " HPa. The measured current consuption is " + str(ma) + " Milliamps.\n\n You could: \n 1) unclog the pipe (worked 60% of the time) \n 2) reduce the operational speed (worked 40% of the time)")
+    else:
+        w1.configure(image=works)
+        warning.set("The measured pressure is " + str(pressure) + " HPa. The measured current consuption is " + str(ma) + " Milliamps.\n\n ")
+    root.update_idletasks()
+    root.update()
 
 
